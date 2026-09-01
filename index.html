@@ -33,6 +33,18 @@
 
     .container { max-width: 1400px; margin: 0 auto; }
 
+    /* HOME NAV BUTTON */
+    .nav-btn {
+      background: rgba(0, 204, 255, 0.1); border: 1px solid var(--stock-blue);
+      color: var(--stock-blue); padding: 8px 16px; border-radius: 4px;
+      text-decoration: none; font-weight: bold; font-size: 14px;
+      display: inline-flex; align-items: center; gap: 8px; transition: all 0.3s;
+    }
+    .nav-btn:hover { 
+      background: var(--stock-blue); color: var(--bg-black); 
+      box-shadow: 0 0 10px rgba(0, 204, 255, 0.5); 
+    }
+
     /* HEADER */
     .app-header {
       display: flex; justify-content: space-between; align-items: flex-end;
@@ -158,6 +170,13 @@
 
 <div class="container">
   
+  <!-- HOME APP BUTTON -->
+  <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;" class="no-print">
+    <a href="https://paiboon-creater.github.io/Data_Information_Jaguar_productions/" class="nav-btn">
+      <i class="fa-solid fa-house"></i> HOME APP
+    </a>
+  </div>
+
   <div class="app-header no-print">
     <div>
       <h1 class="app-title"><i class="fa-solid fa-chart-line"></i> PROD_BOARD</h1>
