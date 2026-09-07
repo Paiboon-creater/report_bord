@@ -39,10 +39,18 @@
       color: var(--stock-blue); padding: 8px 16px; border-radius: 4px;
       text-decoration: none; font-weight: bold; font-size: 14px;
       display: inline-flex; align-items: center; gap: 8px; transition: all 0.3s;
+      cursor: pointer;
     }
     .nav-btn:hover { 
       background: var(--stock-blue); color: var(--bg-black); 
       box-shadow: 0 0 10px rgba(0, 204, 255, 0.5); 
+    }
+    
+    .btn-manual-toggle {
+      border-color: var(--stock-yellow); color: var(--stock-yellow); background: rgba(255, 204, 0, 0.1);
+    }
+    .btn-manual-toggle:hover {
+      background: var(--stock-yellow); color: var(--bg-black); box-shadow: 0 0 10px rgba(255, 204, 0, 0.5); 
     }
 
     /* HEADER */
@@ -127,12 +135,34 @@
     
     .loading-msg { text-align: center; padding: 30px; color: var(--stock-blue); font-size: 16px; letter-spacing: 2px; }
 
+    /* MODAL (User Manual) */
+    .modal {
+      display: none; position: fixed; z-index: 1000; left: 0; top: 0;
+      width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.85);
+      backdrop-filter: blur(4px);
+    }
+    .modal-content {
+      background-color: var(--panel-bg); margin: 5% auto; padding: 20px 30px;
+      border: 1px solid var(--border-dark); width: 90%; max-width: 800px;
+      border-radius: 4px; box-shadow: 0 0 20px rgba(255, 204, 0, 0.2);
+    }
+    .modal-header {
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1px dashed var(--border-dark); padding-bottom: 10px; margin-bottom: 20px;
+    }
+    .modal-header h2 { color: var(--stock-yellow); margin: 0; letter-spacing: 1px; }
+    .close-modal { color: var(--text-muted); font-size: 28px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+    .close-modal:hover { color: var(--stock-red); }
+    .manual-body h3 { color: var(--stock-blue); border-bottom: 1px solid var(--border-dark); padding-bottom: 5px; margin-top: 25px; }
+    .manual-body p, .manual-body li { line-height: 1.7; font-size: 15px; color: var(--text-main); }
+    .manual-body ul { padding-left: 20px; }
+
     /* PRINT STATEMENT HEADER (Hidden on Web) */
     .print-header { display: none; }
     .print-summary { display: none; }
 
     /* ==========================================
-       PRINT MEDIA QUERY (BANK STATEMENT STYLE)
+       PRINT MEDIA QUERY
     ========================================== */
     @media print {
       body {
@@ -170,8 +200,11 @@
 
 <div class="container">
   
-  <!-- HOME APP BUTTON -->
-  <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;" class="no-print">
+  <!-- TOP NAVIGATION BUTTONS -->
+  <div style="display: flex; justify-content: flex-end; margin-bottom: 10px; gap: 10px;" class="no-print">
+    <button class="nav-btn btn-manual-toggle" onclick="toggleManual()">
+      <i class="fa-solid fa-book-open"></i> คู่มือการใช้งาน
+    </button>
     <a href="https://paiboon-creater.github.io/Data_Information_Jaguar_productions/" class="nav-btn">
       <i class="fa-solid fa-house"></i> HOME APP
     </a>
@@ -280,6 +313,46 @@
     </table>
   </div>
 
+</div>
+
+<!-- USER MANUAL MODAL -->
+<div id="manualModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2><i class="fa-solid fa-book-open"></i> คู่มือการใช้งาน (User Manual)</h2>
+      <span class="close-modal" onclick="toggleManual()">&times;</span>
+    </div>
+    
+    <div id="printableManualArea" class="manual-body">
+      <h3>1. ภาพรวมระบบและการสรุปยอด (Summary Board)</h3>
+      <p>ระบบ <b>PROD_BOARD</b> ถูกออกแบบมาเพื่อติดตามยอดการผลิตในรูปแบบกระดานหุ้นแบบเรียลไทม์ ด้านบนของหน้าจอจะแสดงข้อมูลสรุปผลรวม (TOTAL QTY และ TOTAL HOURS) ซึ่งตัวเลขเหล่านี้จะแปรผันตามเงื่อนไขการค้นหาที่คุณเลือกในช่องตัวกรองทันที</p>
+
+      <h3>2. การใช้งานตัวกรองข้อมูล (Filters)</h3>
+      <ul>
+        <li><b>ช่วงวันที่ (Date From / Date To):</b> เมื่อมีการเปลี่ยนวันที่ ระบบจะทำการดึงข้อมูลใหม่จากฐานข้อมูล (Database) ทันที</li>
+        <li><b>ตัวกรองรายละเอียด (Order No, PO No, Work Code, Step, Employee):</b> เมื่อเลือกตัวกรองเหล่านี้ ระบบจะคัดกรองข้อมูลที่แสดงอยู่บนตารางในทันที (Active Filtering) โดยไม่ต้องรอโหลดหน้าจอใหม่</li>
+      </ul>
+
+      <h3>3. การอ่านค่าประสิทธิภาพการทำงาน (Efficiency)</h3>
+      <p>ช่อง EFFICIENCY คำนวณจากยอดที่ผลิตได้จริงเปรียบเทียบกับเป้าหมายที่กำหนดไว้ต่อชั่วโมง โดยจะแสดงสถานะเป็นสีและสัญลักษณ์ดังนี้:</p>
+      <ul>
+        <li><span class="val-up"><i class="fa-solid fa-caret-up"></i> สีเขียว (100% ขึ้นไป):</span> ปฏิบัติงานได้ตามเป้าหมายหรือสูงกว่าเป้าหมายที่กำหนด</li>
+        <li><span class="val-mid"><i class="fa-solid fa-minus"></i> สีเหลือง (80% - 99%):</span> ปฏิบัติงานได้ต่ำกว่าเป้าหมายเล็กน้อย แต่อยู่ในเกณฑ์ที่ยอมรับได้</li>
+        <li><span class="val-down"><i class="fa-solid fa-caret-down"></i> สีแดง (ต่ำกว่า 80%):</span> ปฏิบัติงานได้ต่ำกว่าเป้าหมาย ต้องได้รับการตรวจสอบหรือแก้ไข</li>
+      </ul>
+
+      <h3>4. ปุ่มคำสั่งการทำงาน (Action Buttons)</h3>
+      <ul>
+        <li><b><i class="fa-solid fa-rotate"></i> REFRESH DATA:</b> กดเพื่อสั่งให้ระบบโหลดข้อมูลชุดล่าสุดจากฐานข้อมูลตามช่วงวันที่ที่เลือกไว้</li>
+        <li><b><i class="fa-solid fa-file-excel"></i> EXCEL EXPORT:</b> ส่งออกข้อมูลที่แสดงบนตาราง ณ ขณะนั้นออกเป็นไฟล์นามสกุล .xls สำหรับใช้งานใน Microsoft Excel</li>
+        <li><b><i class="fa-solid fa-print"></i> PRINT STATEMENT:</b> พิมพ์รายงานการผลิต โดยระบบจะเปลี่ยนรูปแบบหน้าจอ (Theme) เป็นเอกสารพื้นหลังสีขาว รูปแบบ Statement พิมพ์ทางหน้ากระดาษเพื่อความเป็นทางการโดยอัตโนมัติ</li>
+      </ul>
+    </div>
+
+    <div style="margin-top: 25px; border-top: 1px dashed var(--border-dark); padding-top: 15px; display: flex; justify-content: flex-end;">
+      <button class="btn btn-print" onclick="printManualDocument()"><i class="fa-solid fa-print"></i> พิมพ์คู่มือนี้ (PRINT MANUAL)</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -536,6 +609,63 @@
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
+  }
+
+  // ==========================================
+  // USER MANUAL FUNCTIONS
+  // ==========================================
+  function toggleManual() {
+    const modal = document.getElementById('manualModal');
+    if (modal.style.display === "block") {
+      modal.style.display = "none";
+    } else {
+      modal.style.display = "block";
+    }
+  }
+
+  // ปิด Modal เมื่อคลิกพื้นที่ว่างด้านนอก
+  window.onclick = function(event) {
+    const modal = document.getElementById('manualModal');
+    if (event.target == modal) {
+      modal.style.display = "none";
+    }
+  }
+
+  function printManualDocument() {
+    const manualContent = document.getElementById('printableManualArea').innerHTML;
+    const printWindow = window.open('', '_blank', 'width=800,height=600');
+    
+    printWindow.document.write(`
+      <html>
+      <head>
+        <title>คู่มือการใช้งานระบบ PROD_BOARD</title>
+        <style>
+          body { font-family: 'Sarabun', sans-serif, Arial; color: #000; padding: 30px; line-height: 1.6; }
+          h2 { border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
+          h3 { color: #333; margin-top: 25px; }
+          .val-up, .val-down, .val-mid { font-weight: bold; }
+          ul { padding-left: 20px; }
+          li { margin-bottom: 8px; }
+        </style>
+      </head>
+      <body>
+        <h2>คู่มือการใช้งานระบบ PROD_BOARD (User Manual)</h2>
+        ${manualContent}
+        <div style="margin-top: 40px; text-align: center; font-size: 12px; color: #666;">
+          -- เอกสารสร้างขึ้นอัตโนมัติจากระบบ --
+        </div>
+      </body>
+      </html>
+    `);
+    
+    printWindow.document.close();
+    printWindow.focus();
+    
+    // ตั้งหน่วงเวลาเล็กน้อยให้หน้าเว็บเรนเดอร์สำเร็จก่อนทำการสั่งพิมพ์
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.close();
+    }, 250);
   }
 </script>
 </body>
